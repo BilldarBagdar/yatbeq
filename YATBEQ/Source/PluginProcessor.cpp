@@ -199,21 +199,26 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 juce::AudioProcessorValueTreeState::ParameterLayout YATBEQAudioProcessor::createParameters()
 {
     juce::AudioProcessorValueTreeState::ParameterLayout rtn;
+    float startValue = 20.f;
     rtn.add(std::make_unique<juce::AudioParameterFloat>("LowCut Freq", "LowCut Freq", 
         juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f), 
-        20.f));
+        startValue));
+    startValue = 20000.f;
     rtn.add(std::make_unique<juce::AudioParameterFloat>("HighCut Freq", "HighCut Freq",
         juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f), 
-        20000.f));
+        startValue));
+    startValue = 750.f;
     rtn.add(std::make_unique<juce::AudioParameterFloat>("Peak Freq", "Peak Freq",
         juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f), 
-        750.f));
+        startValue));
+    startValue = 0.f;
     rtn.add(std::make_unique<juce::AudioParameterFloat>("Peak Gain", "Peak Gain",
         juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, 1.f), 
-        0.f));
+        startValue));
+    startValue = 1.f;
     rtn.add(std::make_unique<juce::AudioParameterFloat>("Peak Quality", "Peak Quality",
         juce::NormalisableRange<float>(0.1f, 10.f, 0.05f, 1.f),
-        1.f));
+        startValue));
 
     juce::StringArray cutAmountChoices;
     for (int i = 0; i < 4; ++i)
