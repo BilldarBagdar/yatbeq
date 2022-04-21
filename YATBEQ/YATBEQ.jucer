@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="ngUKjx" name="YATBEQ" projectType="audioplug" useAppConfig="0"
-              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1">
+              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
+              cppLanguageStandard="20">
   <MAINGROUP id="e5GqnT" name="YATBEQ">
     <GROUP id="{90B88754-8CC4-A25A-EF6B-0ACA38B20C7E}" name="Source">
       <FILE id="hg3Fua" name="PluginProcessor.cpp" compile="1" resource="0"
