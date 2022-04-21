@@ -166,7 +166,8 @@ bool YATBEQAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* YATBEQAudioProcessor::createEditor()
 {
-    return new YATBEQAudioProcessorEditor (*this);
+    //return new YATBEQAudioProcessorEditor (*this);
+    return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================
@@ -188,4 +189,45 @@ void YATBEQAudioProcessor::setStateInformation (const void* data, int sizeInByte
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new YATBEQAudioProcessor();
+    
+}
+
+//==============================================================================
+//
+// 
+//==============================================================================
+juce::AudioProcessorValueTreeState::ParameterLayout YATBEQAudioProcessor::createParameters()
+{
+    juce::AudioProcessorValueTreeState::ParameterLayout rtn;
+    rtn.add(std::make_unique<juce::AudioParameterFloat>("LowCut Freq", "LowCut Freq", 
+        juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f), 
+        20.f));
+    rtn.add(std::make_unique<juce::AudioParameterFloat>("HighCut Freq", "HighCut Freq",
+        juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f), 
+        20000.f));
+    rtn.add(std::make_unique<juce::AudioParameterFloat>("Peak Freq", "Peak Freq",
+        juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f), 
+        750.f));
+    rtn.add(std::make_unique<juce::AudioParameterFloat>("Peak Gain", "Peak Gain",
+        juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, 1.f), 
+        0.f));
+    rtn.add(std::make_unique<juce::AudioParameterFloat>("Peak Quality", "Peak Quality",
+        juce::NormalisableRange<float>(0.1f, 10.f, 0.05f, 1.f),
+        1.f));
+
+    juce::StringArray cutAmountChoices;
+    for (int i = 0; i < 4; ++i)
+    {
+        juce::String str;
+        str << (12 + i * 12);
+        str << " db/oct";
+        cutAmountChoices.add(str);
+    }
+
+    rtn.add(std::make_unique<juce::AudioParameterChoice>("LowCut Slope", "LowCut Slope",
+        cutAmountChoices, 0));
+    rtn.add(std::make_unique<juce::AudioParameterChoice>("HighCut Slope", "HighCut Slope",
+        cutAmountChoices, 0));
+
+    return rtn;
 }
