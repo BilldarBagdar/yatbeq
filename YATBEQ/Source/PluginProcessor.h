@@ -99,6 +99,13 @@ private:
     // use the alias to declare a helper function
     static void updateCoefficients(Coefficients& old, const Coefficients& replacements);
 
+    template<int Index, typename ChainType, typename CoefficientType>
+    void update(ChainType& chain, CoefficientType& coefficients)
+    {
+        updateCoefficients(chain.template get<Index>().coefficients, coefficients[Index]);
+        chain.template setBypassed<Index>(false);
+    }
+
     template<typename ChainType, typename CoefficientType>
     void updateCutFilter(ChainType& cutType, const CoefficientType& cutCoefficients, const Slope& cutSlope)
     {
@@ -110,41 +117,21 @@ private:
 
         switch (cutSlope)
         {
-        case Slope_12:
+        case Slope_48:
         {
-            updateCoefficients(cutType.template get<0>().coefficients, cutCoefficients[0]);
-            cutType.template setBypassed<0>(false);
-            break;
-        }
-        case Slope_24:
-        {
-            updateCoefficients(cutType.template get<0>().coefficients, cutCoefficients[0]);
-            updateCoefficients(cutType.template get<1>().coefficients, cutCoefficients[1]);
-            cutType.template setBypassed<0>(false);
-            cutType.template setBypassed<1>(false);
-            break;
+            update<3>(cutType, cutCoefficients);
         }
         case Slope_36:
         {
-            updateCoefficients(cutType.template get<0>().coefficients, cutCoefficients[0]);
-            updateCoefficients(cutType.template get<1>().coefficients, cutCoefficients[1]);
-            updateCoefficients(cutType.template get<2>().coefficients, cutCoefficients[2]);
-            cutType.template setBypassed<0>(false);
-            cutType.template setBypassed<1>(false);
-            cutType.template setBypassed<2>(false);
-            break;
+            update<2>(cutType, cutCoefficients);
         }
-        case Slope_48:
+        case Slope_24:
         {
-            updateCoefficients(cutType.template get<0>().coefficients, cutCoefficients[0]);
-            updateCoefficients(cutType.template get<1>().coefficients, cutCoefficients[1]);
-            updateCoefficients(cutType.template get<2>().coefficients, cutCoefficients[2]);
-            updateCoefficients(cutType.template get<3>().coefficients, cutCoefficients[3]);
-            cutType.template setBypassed<0>(false);
-            cutType.template setBypassed<1>(false);
-            cutType.template setBypassed<2>(false);
-            cutType.template setBypassed<3>(false);
-            break;
+            update<1>(cutType, cutCoefficients);
+        }
+        case Slope_12:
+        {
+            update<0>(cutType, cutCoefficients);
         }
         }
 
