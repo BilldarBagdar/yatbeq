@@ -113,8 +113,8 @@ void YATBEQAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock
     auto& leftLowCut = leftChain.get<ChainPositions::LowCut>();
     auto& rightLowCut = rightChain.get<ChainPositions::LowCut>();
 
-    updateCutFilter(leftLowCut, cutCoefficients, chainSettings);
-    updateCutFilter(rightLowCut, cutCoefficients, chainSettings);
+    updateCutFilter(leftLowCut, cutCoefficients, chainSettings.lowCutSlope);
+    updateCutFilter(rightLowCut, cutCoefficients, chainSettings.lowCutSlope);
 
 }
 
@@ -176,15 +176,17 @@ void YATBEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     auto chainSettings = getTreeStateChainSettings(apvts);
     updatePeakFilter(chainSettings);
 
-    auto cutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.lowCutFreq, 
+    auto cutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(
+        chainSettings.lowCutFreq, 
         getSampleRate(),
         2 * (chainSettings.lowCutSlope + 1));
 
     auto& leftLowCut = leftChain.get<ChainPositions::LowCut>();
     auto& rightLowCut = rightChain.get<ChainPositions::LowCut>();
 
-    updateCutFilter(leftLowCut, cutCoefficients, chainSettings);
-    updateCutFilter(rightLowCut, cutCoefficients, chainSettings);
+    updateCutFilter(leftLowCut, cutCoefficients, chainSettings.lowCutSlope);
+    updateCutFilter(rightLowCut, cutCoefficients, chainSettings.lowCutSlope);
+
 
 
     // run audio

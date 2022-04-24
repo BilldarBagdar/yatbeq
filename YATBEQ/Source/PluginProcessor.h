@@ -19,7 +19,7 @@ struct ChainSettings
 {
     float peakFreq{ 0 }, peakGainInDecibels{ 0 }, peakQuality{ 1.f };
     float lowCutFreq{ 0 }, highCutFreq{ 0 };
-    int lowCutSlope{ Slope::Slope_12 }, highCutSlope{ Slope::Slope_12 };
+    Slope lowCutSlope{ Slope::Slope_12 }, highCutSlope{ Slope::Slope_12 };
 };
 
 ChainSettings getTreeStateChainSettings(juce::AudioProcessorValueTreeState& apvts);
@@ -100,54 +100,50 @@ private:
     static void updateCoefficients(Coefficients& old, const Coefficients& replacements);
 
     template<typename ChainType, typename CoefficientType>
-    void updateCutFilter(ChainType& leftLowCut, const CoefficientType& cutCoefficients, const ChainSettings& chainSettings)
+    void updateCutFilter(ChainType& cutType, const CoefficientType& cutCoefficients, const Slope& cutSlope)
     {
-        //auto cutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.lowCutFreq, getSampleRate(),
-        //    2 * (chainSettings.lowCutSlope + 1));
 
-        //auto& leftLowCut = leftChain.get<ChainPositions::LowCut>();
+        cutType.template setBypassed<0>(true);
+        cutType.template setBypassed<1>(true);
+        cutType.template setBypassed<2>(true);
+        cutType.template setBypassed<3>(true);
 
-        leftLowCut.template setBypassed<0>(true);
-        leftLowCut.template setBypassed<1>(true);
-        leftLowCut.template setBypassed<2>(true);
-        leftLowCut.template setBypassed<3>(true);
-
-        switch (chainSettings.lowCutSlope)
+        switch (cutSlope)
         {
         case Slope_12:
         {
-            *leftLowCut.template get<0>().coefficients = *cutCoefficients[0];
-            leftLowCut.template setBypassed<0>(false);
+            *cutType.template get<0>().coefficients = *cutCoefficients[0];
+            cutType.template setBypassed<0>(false);
             break;
         }
         case Slope_24:
         {
-            *leftLowCut.template get<0>().coefficients = *cutCoefficients[0];
-            leftLowCut.template setBypassed<0>(false);
-            *leftLowCut.template get<1>().coefficients = *cutCoefficients[1];
-            leftLowCut.template setBypassed<1>(false);
+            *cutType.template get<0>().coefficients = *cutCoefficients[0];
+            cutType.template setBypassed<0>(false);
+            *cutType.template get<1>().coefficients = *cutCoefficients[1];
+            cutType.template setBypassed<1>(false);
             break;
         }
         case Slope_36:
         {
-            *leftLowCut.template get<0>().coefficients = *cutCoefficients[0];
-            leftLowCut.template setBypassed<0>(false);
-            *leftLowCut.template get<1>().coefficients = *cutCoefficients[1];
-            leftLowCut.template setBypassed<1>(false);
-            *leftLowCut.template get<2>().coefficients = *cutCoefficients[2];
-            leftLowCut.template setBypassed<2>(false);
+            *cutType.template get<0>().coefficients = *cutCoefficients[0];
+            cutType.template setBypassed<0>(false);
+            *cutType.template get<1>().coefficients = *cutCoefficients[1];
+            cutType.template setBypassed<1>(false);
+            *cutType.template get<2>().coefficients = *cutCoefficients[2];
+            cutType.template setBypassed<2>(false);
             break;
         }
         case Slope_48:
         {
-            *leftLowCut.template get<0>().coefficients = *cutCoefficients[0];
-            leftLowCut.template setBypassed<0>(false);
-            *leftLowCut.template get<1>().coefficients = *cutCoefficients[1];
-            leftLowCut.template setBypassed<1>(false);
-            *leftLowCut.template get<2>().coefficients = *cutCoefficients[2];
-            leftLowCut.template setBypassed<2>(false);
-            *leftLowCut.template get<3>().coefficients = *cutCoefficients[3];
-            leftLowCut.template setBypassed<3>(false);
+            *cutType.template get<0>().coefficients = *cutCoefficients[0];
+            cutType.template setBypassed<0>(false);
+            *cutType.template get<1>().coefficients = *cutCoefficients[1];
+            cutType.template setBypassed<1>(false);
+            *cutType.template get<2>().coefficients = *cutCoefficients[2];
+            cutType.template setBypassed<2>(false);
+            *cutType.template get<3>().coefficients = *cutCoefficients[3];
+            cutType.template setBypassed<3>(false);
             break;
         }
         }
