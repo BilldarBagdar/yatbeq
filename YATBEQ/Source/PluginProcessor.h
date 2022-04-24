@@ -91,6 +91,13 @@ private:
         Peak,
         HighCut
     };
+
+    void updatePeakFilter(const ChainSettings& chainSettings);
+
+    // declare an alias to some relatively unknown type
+    using Coefficients = Filter::CoefficientsPtr;
+    // use the alias to declare a helper function
+    static void updateCoefficients(Coefficients& old, const Coefficients& replacements);
     
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (YATBEQAudioProcessor)

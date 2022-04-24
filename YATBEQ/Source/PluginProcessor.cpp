@@ -105,11 +105,7 @@ void YATBEQAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock
     rightChain.prepare(spec);
 
     auto chainSettings = getTreeStateChainSettings(apvts);
-    auto peakCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, chainSettings.peakFreq, chainSettings.peakQuality, 
-        juce::Decibels::decibelsToGain(chainSettings.peakGainInDecibels));
-
-    *leftChain.get<ChainPositions::Peak>().coefficients = *peakCoefficients;
-    *rightChain.get<ChainPositions::Peak>().coefficients = *peakCoefficients;
+    updatePeakFilter(chainSettings);
 
     auto cutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.lowCutFreq, sampleRate, 
         2 * (chainSettings.lowCutSlope + 1));
@@ -266,8 +262,7 @@ void YATBEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
 
     // make updates
     auto chainSettings = getTreeStateChainSettings(apvts);
-    auto peakCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(getSampleRate(), chainSettings.peakFreq, chainSettings.peakQuality,
-        juce::Decibels::decibelsToGain(chainSettings.peakGainInDecibels));
+    updatePeakFilter(chainSettings);
 
     auto cutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.lowCutFreq, getSampleRate(),
         2 * (chainSettings.lowCutSlope + 1));
@@ -365,10 +360,6 @@ void YATBEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
         break;
     }
     }
-
-
-    *leftChain.get<ChainPositions::Peak>().coefficients = *peakCoefficients;
-    *rightChain.get<ChainPositions::Peak>().coefficients = *peakCoefficients;
 
     // run audio
     juce::dsp::AudioBlock<float> block(buffer);
@@ -480,4 +471,18 @@ ChainSettings getTreeStateChainSettings(juce::AudioProcessorValueTreeState& apvt
     rtn.highCutSlope = static_cast<Slope>(apvts.getRawParameterValue("HighCut Slope")->load());
 
     return rtn;
+}
+
+void YATBEQAudioProcessor::updatePeakFilter(const ChainSettings& chainSettings)
+{
+    auto peakCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(getSampleRate(), chainSettings.peakFreq, chainSettings.peakQuality,
+        juce::Decibels::decibelsToGain(chainSettings.peakGainInDecibels));
+
+    updateCoefficients(leftChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
+    updateCoefficients(rightChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
+}
+
+void YATBEQAudioProcessor::updateCoefficients(Coefficients& old, const Coefficients& replacements)
+{
+    *old = *replacements;
 }
