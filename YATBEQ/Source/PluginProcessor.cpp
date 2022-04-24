@@ -103,6 +103,13 @@ void YATBEQAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock
 
     leftChain.prepare(spec);
     rightChain.prepare(spec);
+
+    auto chainSettings = getTreeStateChainSettings(apvts);
+    auto peakCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, chainSettings.peakFreq, chainSettings.peakQuality, 
+        juce::Decibels::decibelsToGain(chainSettings.peakGainInDecibels));
+
+    *leftChain.get<ChainPositions::Peak>().coefficients = *peakCoefficients;
+    *rightChain.get<ChainPositions::Peak>().coefficients = *peakCoefficients;
 }
 
 void YATBEQAudioProcessor::releaseResources()
@@ -159,6 +166,15 @@ void YATBEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
 
+    // make updates
+    auto chainSettings = getTreeStateChainSettings(apvts);
+    auto peakCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(getSampleRate(), chainSettings.peakFreq, chainSettings.peakQuality,
+        juce::Decibels::decibelsToGain(chainSettings.peakGainInDecibels));
+
+    *leftChain.get<ChainPositions::Peak>().coefficients = *peakCoefficients;
+    *rightChain.get<ChainPositions::Peak>().coefficients = *peakCoefficients;
+
+    // run audio
     juce::dsp::AudioBlock<float> block(buffer);
     auto leftBlock = block.getSingleChannelBlock(0);
     auto rightBlock = block.getSingleChannelBlock(1);
@@ -211,26 +227,27 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 juce::AudioProcessorValueTreeState::ParameterLayout YATBEQAudioProcessor::createParameters()
 {
     juce::AudioProcessorValueTreeState::ParameterLayout rtn;
-    float startValue = 20.f;
+    float startParamValue = 20.f;
+    const float skew = 0.25f;
     rtn.add(std::make_unique<juce::AudioParameterFloat>("LowCut Freq", "LowCut Freq", 
-        juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f), 
-        startValue));
-    startValue = 20000.f;
+        juce::NormalisableRange<float>(20.f, 20000.f, 1.f, skew),
+        startParamValue));
+    startParamValue = 20000.f;
     rtn.add(std::make_unique<juce::AudioParameterFloat>("HighCut Freq", "HighCut Freq",
-        juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f), 
-        startValue));
-    startValue = 750.f;
+        juce::NormalisableRange<float>(20.f, 20000.f, 1.f, skew),
+        startParamValue));
+    startParamValue = 750.f;
     rtn.add(std::make_unique<juce::AudioParameterFloat>("Peak Freq", "Peak Freq",
-        juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f), 
-        startValue));
-    startValue = 0.f;
+        juce::NormalisableRange<float>(20.f, 20000.f, 1.f, skew),
+        startParamValue));
+    startParamValue = 0.f;
     rtn.add(std::make_unique<juce::AudioParameterFloat>("Peak Gain", "Peak Gain",
-        juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, 1.f), 
-        startValue));
-    startValue = 1.f;
+        juce::NormalisableRange<float>(-24.f, 24.f, 0.05f, 1.f),
+        startParamValue));
+    startParamValue = 1.f;
     rtn.add(std::make_unique<juce::AudioParameterFloat>("Peak Quality", "Peak Quality",
         juce::NormalisableRange<float>(0.1f, 10.f, 0.05f, 1.f),
-        startValue));
+        startParamValue));
 
     juce::StringArray cutAmountChoices;
     for (int i = 0; i < 4; ++i)
@@ -245,6 +262,21 @@ juce::AudioProcessorValueTreeState::ParameterLayout YATBEQAudioProcessor::create
         cutAmountChoices, 0));
     rtn.add(std::make_unique<juce::AudioParameterChoice>("HighCut Slope", "HighCut Slope",
         cutAmountChoices, 0));
+
+    return rtn;
+}
+
+ChainSettings getTreeStateChainSettings(juce::AudioProcessorValueTreeState& apvts)
+{
+    ChainSettings rtn;
+
+    rtn.lowCutFreq = apvts.getRawParameterValue("LowCut Freq")->load();
+    rtn.highCutFreq = apvts.getRawParameterValue("HighCut Freq")->load();
+    rtn.peakFreq = apvts.getRawParameterValue("Peak Freq")->load();
+    rtn.peakGainInDecibels = apvts.getRawParameterValue("Peak Gain")->load();
+    rtn.peakQuality = apvts.getRawParameterValue("Peak Quality")->load();
+    rtn.lowCutSlope = apvts.getRawParameterValue("LowCut Slope")->load();
+    rtn.highCutSlope = apvts.getRawParameterValue("HighCut Slope")->load();
 
     return rtn;
 }
