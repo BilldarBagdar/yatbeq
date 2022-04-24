@@ -107,7 +107,9 @@ void YATBEQAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock
     auto chainSettings = getTreeStateChainSettings(apvts);
     updatePeakFilter(chainSettings);
 
-    auto cutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.lowCutFreq, sampleRate, 
+    auto cutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(
+        chainSettings.lowCutFreq, 
+        sampleRate, 
         2 * (chainSettings.lowCutSlope + 1));
 
     auto& leftLowCut = leftChain.get<ChainPositions::LowCut>();
@@ -115,6 +117,17 @@ void YATBEQAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock
 
     updateCutFilter(leftLowCut, cutCoefficients, chainSettings.lowCutSlope);
     updateCutFilter(rightLowCut, cutCoefficients, chainSettings.lowCutSlope);
+
+    cutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(
+        chainSettings.highCutFreq, 
+        sampleRate,
+        2 * (chainSettings.highCutSlope + 1));
+
+    auto& leftHighCut = leftChain.get<ChainPositions::HighCut>();
+    auto& rightHighCut = rightChain.get<ChainPositions::HighCut>();
+
+    updateCutFilter(leftHighCut, cutCoefficients, chainSettings.highCutSlope);
+    updateCutFilter(rightHighCut, cutCoefficients, chainSettings.highCutSlope);
 
 }
 
@@ -186,6 +199,19 @@ void YATBEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
 
     updateCutFilter(leftLowCut, cutCoefficients, chainSettings.lowCutSlope);
     updateCutFilter(rightLowCut, cutCoefficients, chainSettings.lowCutSlope);
+
+
+
+    cutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(
+        chainSettings.highCutFreq,
+        getSampleRate(),
+        2 * (chainSettings.highCutSlope + 1));
+
+    auto& leftHighCut = leftChain.get<ChainPositions::HighCut>();
+    auto& rightHighCut = rightChain.get<ChainPositions::HighCut>();
+
+    updateCutFilter(leftHighCut, cutCoefficients, chainSettings.highCutSlope);
+    updateCutFilter(rightHighCut, cutCoefficients, chainSettings.highCutSlope);
 
 
 
