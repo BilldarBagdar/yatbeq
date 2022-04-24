@@ -112,37 +112,37 @@ private:
         {
         case Slope_12:
         {
-            *cutType.template get<0>().coefficients = *cutCoefficients[0];
+            updateCoefficients(cutType.template get<0>().coefficients, cutCoefficients[0]);
             cutType.template setBypassed<0>(false);
             break;
         }
         case Slope_24:
         {
-            *cutType.template get<0>().coefficients = *cutCoefficients[0];
+            updateCoefficients(cutType.template get<0>().coefficients, cutCoefficients[0]);
+            updateCoefficients(cutType.template get<1>().coefficients, cutCoefficients[1]);
             cutType.template setBypassed<0>(false);
-            *cutType.template get<1>().coefficients = *cutCoefficients[1];
             cutType.template setBypassed<1>(false);
             break;
         }
         case Slope_36:
         {
-            *cutType.template get<0>().coefficients = *cutCoefficients[0];
+            updateCoefficients(cutType.template get<0>().coefficients, cutCoefficients[0]);
+            updateCoefficients(cutType.template get<1>().coefficients, cutCoefficients[1]);
+            updateCoefficients(cutType.template get<2>().coefficients, cutCoefficients[2]);
             cutType.template setBypassed<0>(false);
-            *cutType.template get<1>().coefficients = *cutCoefficients[1];
             cutType.template setBypassed<1>(false);
-            *cutType.template get<2>().coefficients = *cutCoefficients[2];
             cutType.template setBypassed<2>(false);
             break;
         }
         case Slope_48:
         {
-            *cutType.template get<0>().coefficients = *cutCoefficients[0];
+            updateCoefficients(cutType.template get<0>().coefficients, cutCoefficients[0]);
+            updateCoefficients(cutType.template get<1>().coefficients, cutCoefficients[1]);
+            updateCoefficients(cutType.template get<2>().coefficients, cutCoefficients[2]);
+            updateCoefficients(cutType.template get<3>().coefficients, cutCoefficients[3]);
             cutType.template setBypassed<0>(false);
-            *cutType.template get<1>().coefficients = *cutCoefficients[1];
             cutType.template setBypassed<1>(false);
-            *cutType.template get<2>().coefficients = *cutCoefficients[2];
             cutType.template setBypassed<2>(false);
-            *cutType.template get<3>().coefficients = *cutCoefficients[3];
             cutType.template setBypassed<3>(false);
             break;
         }
