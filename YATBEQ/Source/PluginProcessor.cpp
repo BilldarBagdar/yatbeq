@@ -185,8 +185,8 @@ bool YATBEQAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* YATBEQAudioProcessor::createEditor()
 {
-    //return new YATBEQAudioProcessorEditor (*this);
-    return new juce::GenericAudioProcessorEditor(*this);
+    return new YATBEQAudioProcessorEditor (*this);
+    //return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================
