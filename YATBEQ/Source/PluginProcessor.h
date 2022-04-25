@@ -37,6 +37,13 @@ enum ChainPositions
     HighCut
 };
 
+// declare an alias to some relatively unknown type
+using Coefficients = Filter::CoefficientsPtr;
+// use the alias to declare a helper function
+void updateCoefficients(Coefficients& old, const Coefficients& replacements);
+
+Coefficients makepeakFilter(ChainSettings& chainSettings, double sampleRate);
+
 //==============================================================================
 /**
 */
@@ -106,11 +113,6 @@ private:
     //};
 
     void updatePeakFilter(const ChainSettings& chainSettings);
-
-    // declare an alias to some relatively unknown type
-    using Coefficients = Filter::CoefficientsPtr;
-    // use the alias to declare a helper function
-    static void updateCoefficients(Coefficients& old, const Coefficients& replacements);
 
     template<int Index, typename ChainType, typename CoefficientType>
     void update(ChainType& chain, CoefficientType& coefficients)
