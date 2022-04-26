@@ -331,8 +331,8 @@ ChainSettings getTreeStateChainSettings(juce::AudioProcessorValueTreeState& apvt
     // the values are the (cutAmountChoices above) string array indexes in this case {0, 1, 2, 3}
     // which is why 2 * (chainSettings.lowCutSlope + 1) is correct for the filter order
     // parameter calculation in prepareToPlay()
-    rtn.lowCutSlope = static_cast<Slope>(apvts.getRawParameterValue("LowCut Slope")->load());
-    rtn.highCutSlope = static_cast<Slope>(apvts.getRawParameterValue("HighCut Slope")->load());
+    rtn.lowCutSlope = static_cast<Cut_Slope>(apvts.getRawParameterValue("LowCut Slope")->load());
+    rtn.highCutSlope = static_cast<Cut_Slope>(apvts.getRawParameterValue("HighCut Slope")->load());
 
     return rtn;
 }

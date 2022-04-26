@@ -10,7 +10,7 @@
 
 #include <JuceHeader.h>
 
-enum Slope
+enum Cut_Slope
 {
     Slope_12, Slope_24, Slope_36, Slope_48
 };
@@ -19,7 +19,7 @@ struct ChainSettings
 {
     float peakFreq{ 0 }, peakGainInDecibels{ 0 }, peakQuality{ 1.f };
     float lowCutFreq{ 0 }, highCutFreq{ 0 };
-    Slope lowCutSlope{ Slope::Slope_12 }, highCutSlope{ Slope::Slope_12 };
+    Cut_Slope lowCutSlope{ Cut_Slope::Slope_12 }, highCutSlope{ Cut_Slope::Slope_12 };
 };
 
 ChainSettings getTreeStateChainSettings(juce::AudioProcessorValueTreeState& apvts);
@@ -53,6 +53,49 @@ enum ChainPositions
     Peak,
     HighCut
 };
+
+template<int Index, typename ChainType, typename CoefficientType>
+void update(ChainType& chain, CoefficientType& coefficients)
+{
+    updateCoefficients(chain.template get<Index>().coefficients, coefficients[Index]);
+    chain.template setBypassed<Index>(false);
+}
+
+template<typename ChainType, typename CoefficientType>
+void updateCutFilter(ChainType& cutType, const CoefficientType& cutCoefficients, const Cut_Slope& cutSlope)
+{
+
+    cutType.template setBypassed<0>(true);
+    cutType.template setBypassed<1>(true);
+    cutType.template setBypassed<2>(true);
+    cutType.template setBypassed<3>(true);
+
+    switch (cutSlope)
+    {
+    case Slope_48:
+    {
+        update<3>(cutType, cutCoefficients);
+    }
+    case Slope_36:
+    {
+        update<2>(cutType, cutCoefficients);
+    }
+    case Slope_24:
+    {
+        update<1>(cutType, cutCoefficients);
+    }
+    case Slope_12:
+    {
+        update<0>(cutType, cutCoefficients);
+    }
+    }
+
+}
+
+//void updateLowCutFilters(const ChainSettings& chainSettings);
+//void updateHighCutFilters(const ChainSettings& chainSettings);
+//
+//void updateFilters();
 
 
 //==============================================================================
@@ -125,43 +168,43 @@ private:
 
     void updatePeakFilter(const ChainSettings& chainSettings);
 
-    template<int Index, typename ChainType, typename CoefficientType>
-    void update(ChainType& chain, CoefficientType& coefficients)
-    {
-        updateCoefficients(chain.template get<Index>().coefficients, coefficients[Index]);
-        chain.template setBypassed<Index>(false);
-    }
+    //template<int Index, typename ChainType, typename CoefficientType>
+    //void update(ChainType& chain, CoefficientType& coefficients)
+    //{
+    //    updateCoefficients(chain.template get<Index>().coefficients, coefficients[Index]);
+    //    chain.template setBypassed<Index>(false);
+    //}
 
-    template<typename ChainType, typename CoefficientType>
-    void updateCutFilter(ChainType& cutType, const CoefficientType& cutCoefficients, const Slope& cutSlope)
-    {
+    //template<typename ChainType, typename CoefficientType>
+    //void updateCutFilter(ChainType& cutType, const CoefficientType& cutCoefficients, const Cut_Slope& cutSlope)
+    //{
 
-        cutType.template setBypassed<0>(true);
-        cutType.template setBypassed<1>(true);
-        cutType.template setBypassed<2>(true);
-        cutType.template setBypassed<3>(true);
+    //    cutType.template setBypassed<0>(true);
+    //    cutType.template setBypassed<1>(true);
+    //    cutType.template setBypassed<2>(true);
+    //    cutType.template setBypassed<3>(true);
 
-        switch (cutSlope)
-        {
-        case Slope_48:
-        {
-            update<3>(cutType, cutCoefficients);
-        }
-        case Slope_36:
-        {
-            update<2>(cutType, cutCoefficients);
-        }
-        case Slope_24:
-        {
-            update<1>(cutType, cutCoefficients);
-        }
-        case Slope_12:
-        {
-            update<0>(cutType, cutCoefficients);
-        }
-        }
+    //    switch (cutSlope)
+    //    {
+    //    case Slope_48:
+    //    {
+    //        update<3>(cutType, cutCoefficients);
+    //    }
+    //    case Slope_36:
+    //    {
+    //        update<2>(cutType, cutCoefficients);
+    //    }
+    //    case Slope_24:
+    //    {
+    //        update<1>(cutType, cutCoefficients);
+    //    }
+    //    case Slope_12:
+    //    {
+    //        update<0>(cutType, cutCoefficients);
+    //    }
+    //    }
 
-    }
+    //}
 
     void updateLowCutFilters(const ChainSettings& chainSettings);
     void updateHighCutFilters(const ChainSettings& chainSettings);
