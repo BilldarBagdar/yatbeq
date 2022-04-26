@@ -34,6 +34,8 @@ YATBEQAudioProcessorEditor::YATBEQAudioProcessorEditor (YATBEQAudioProcessor& p)
         param->addListener(this);
     }
 
+    startTimerHz(60);
+
     setSize (600, 400);
 }
 
