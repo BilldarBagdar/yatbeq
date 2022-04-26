@@ -17,3 +17,18 @@ Session 02:
    But it is still a two step process?  Need to manually start and shutdown AudioPluginHost before and after every 
    debug session?  Want to figure out how to automate the steps.  Build, start AudioPluginHost from save file, attach, debug, 
    detach, stop AudioPluginHost.
+   
+Session 04:
+	Because builds were failing, needed to find a solution to a Linker error in Visual Studio after doing the 
+	"makePeakFilter()" method updates in the tutorial.
+
+	Found a solution here: (use the inline keyword)
+	https://stackoverflow.com/questions/1240634/how-to-get-rid-of-warning-lnk4006-when-not-using-templates
+	
+	after this page
+	https://stackoverflow.com/questions/3705740/c-lnk2019-error-unresolved-external-symbol-template-classs-constructor-and
+	suggested the body of the function needed to move from .cpp to .h (but still got same Linker errors killing builds), 
+	it was easy to add inline keyword above the definition in PluginProcesor.h 
+	
+	Need to figure out why the "final" build step does not automatically copy the "vst3 folder" anywhere on my machine.
+	When AudioPluginHost has the VST3 open, VisualStudio can't currently finish that build.
