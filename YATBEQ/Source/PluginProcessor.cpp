@@ -223,6 +223,7 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 
 //==============================================================================
 //
+// YATBEQAudioProcessor:: members
 // 
 //==============================================================================
 juce::AudioProcessorValueTreeState::ParameterLayout YATBEQAudioProcessor::createParameters()
@@ -267,46 +268,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout YATBEQAudioProcessor::create
     return rtn;
 }
 
-ChainSettings getTreeStateChainSettings(juce::AudioProcessorValueTreeState& apvts)
-{
-    ChainSettings rtn;
-
-    rtn.lowCutFreq = apvts.getRawParameterValue("LowCut Freq")->load();
-    rtn.highCutFreq = apvts.getRawParameterValue("HighCut Freq")->load();
-    rtn.peakFreq = apvts.getRawParameterValue("Peak Freq")->load();
-    rtn.peakGainInDecibels = apvts.getRawParameterValue("Peak Gain")->load();
-    rtn.peakQuality = apvts.getRawParameterValue("Peak Quality")->load();
-
-    // around 1:00:00 in the video, Chuck talks about these integer values, slope choices
-    // the values are the (cutAmountChoices above) string array indexes in this case {0, 1, 2, 3}
-    // which is why 2 * (chainSettings.lowCutSlope + 1) is correct for the filter order
-    // parameter calculation in prepareToPlay()
-    rtn.lowCutSlope = static_cast<Slope>(apvts.getRawParameterValue("LowCut Slope")->load());
-    rtn.highCutSlope = static_cast<Slope>(apvts.getRawParameterValue("HighCut Slope")->load());
-
-    return rtn;
-}
-
-Coefficients makePeakFilter(const ChainSettings& chainSettings, double sampleRate)
-{
-    return juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, chainSettings.peakFreq, chainSettings.peakQuality,
-        juce::Decibels::decibelsToGain(chainSettings.peakGainInDecibels));
-}
-
 void YATBEQAudioProcessor::updatePeakFilter(const ChainSettings& chainSettings)
 {
-    //auto peakCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(getSampleRate(), chainSettings.peakFreq, chainSettings.peakQuality,
-    //    juce::Decibels::decibelsToGain(chainSettings.peakGainInDecibels));
-    auto peakCoefficients = makePeakFilter(chainSettings, getSampleRate());
+    auto peakCoefficients = makeThisPeakFilter(chainSettings, getSampleRate());
 
     updateCoefficients(leftChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
     updateCoefficients(rightChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
-}
-
-void updateCoefficients(Coefficients& old, const Coefficients& replacements)
-//void YATBEQAudioProcessor::updateCoefficients(Coefficients& old, const Coefficients& replacements)
-{
-    *old = *replacements;
 }
 
 void YATBEQAudioProcessor::updateLowCutFilters(const ChainSettings& chainSettings)
@@ -343,4 +310,41 @@ void YATBEQAudioProcessor::updateFilters()
     updatePeakFilter(chainSettings);
     updateLowCutFilters(chainSettings);
     updateHighCutFilters(chainSettings);
+}
+
+//==============================================================================
+//
+// YATBEQAudioProcessor:: free
+// 
+//==============================================================================
+ChainSettings getTreeStateChainSettings(juce::AudioProcessorValueTreeState& apvts)
+{
+    ChainSettings rtn;
+
+    rtn.lowCutFreq = apvts.getRawParameterValue("LowCut Freq")->load();
+    rtn.highCutFreq = apvts.getRawParameterValue("HighCut Freq")->load();
+    rtn.peakFreq = apvts.getRawParameterValue("Peak Freq")->load();
+    rtn.peakGainInDecibels = apvts.getRawParameterValue("Peak Gain")->load();
+    rtn.peakQuality = apvts.getRawParameterValue("Peak Quality")->load();
+
+    // around 1:00:00 in the video, Chuck talks about these integer values, slope choices
+    // the values are the (cutAmountChoices above) string array indexes in this case {0, 1, 2, 3}
+    // which is why 2 * (chainSettings.lowCutSlope + 1) is correct for the filter order
+    // parameter calculation in prepareToPlay()
+    rtn.lowCutSlope = static_cast<Slope>(apvts.getRawParameterValue("LowCut Slope")->load());
+    rtn.highCutSlope = static_cast<Slope>(apvts.getRawParameterValue("HighCut Slope")->load());
+
+    return rtn;
+}
+
+//MyCoefficients makeThisPeakFilter(const ChainSettings& chainSettings, double sampleRate)
+//{
+//    MyCoefficients rtn = juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, chainSettings.peakFreq, chainSettings.peakQuality,
+//        juce::Decibels::decibelsToGain(chainSettings.peakGainInDecibels));
+//    return rtn;
+//}
+
+void updateCoefficients(MyCoefficients& old, const MyCoefficients& replacements)
+{
+    *old = *replacements;
 }

@@ -26,6 +26,23 @@ ChainSettings getTreeStateChainSettings(juce::AudioProcessorValueTreeState& apvt
 
 using Filter = juce::dsp::IIR::Filter<float>;
 
+// declare an alias to some relatively unknown type
+using MyCoefficients = Filter::CoefficientsPtr;
+
+inline 
+MyCoefficients makeThisPeakFilter(const ChainSettings& chainSettings, double sampleRate)
+{
+    MyCoefficients rtn = juce::dsp::IIR::Coefficients<float>::makePeakFilter(
+        sampleRate, chainSettings.peakFreq, chainSettings.peakQuality,
+        juce::Decibels::decibelsToGain(chainSettings.peakGainInDecibels));
+    return rtn;
+}
+
+// use the alias to declare a helper function
+void updateCoefficients(MyCoefficients& old, const MyCoefficients& replacements);
+
+
+
 using CutFilter = juce::dsp::ProcessorChain<Filter, Filter, Filter, Filter>;
 
 using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, CutFilter>;
@@ -37,12 +54,6 @@ enum ChainPositions
     HighCut
 };
 
-// declare an alias to some relatively unknown type
-using Coefficients = Filter::CoefficientsPtr;
-// use the alias to declare a helper function
-void updateCoefficients(Coefficients& old, const Coefficients& replacements);
-
-Coefficients makepeakFilter(ChainSettings& chainSettings, double sampleRate);
 
 //==============================================================================
 /**

@@ -28,11 +28,22 @@ YATBEQAudioProcessorEditor::YATBEQAudioProcessorEditor (YATBEQAudioProcessor& p)
         addAndMakeVisible(comp);
     }
 
+    const auto& params = audioProcessor.getParameters();
+    for (auto param : params)
+    {
+        param->addListener(this);
+    }
+
     setSize (600, 400);
 }
 
 YATBEQAudioProcessorEditor::~YATBEQAudioProcessorEditor()
 {
+    const auto& params = audioProcessor.getParameters();
+    for (auto param : params)
+    {
+        param->removeListener(this);
+    }
 }
 
 //==============================================================================
@@ -161,8 +172,12 @@ void YATBEQAudioProcessorEditor::timerCallback()
     if (parametersChanged.compareAndSetBool(false, true))
     {
         // update the mono chain
-        // signal a repaint
+        auto chainSettings = getTreeStateChainSettings(audioProcessor.apvts);
+        auto peakCoefficients = makeThisPeakFilter(chainSettings, audioProcessor.getSampleRate());
+        updateCoefficients(monoChain.get < ChainPositions::Peak>().coefficients, peakCoefficients);
 
+        // signal a repaint
+        repaint();
     }
 }
 
