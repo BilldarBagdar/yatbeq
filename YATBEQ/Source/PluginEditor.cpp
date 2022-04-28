@@ -351,7 +351,7 @@ YATBEQAudioProcessorEditor::YATBEQAudioProcessorEditor (YATBEQAudioProcessor& p)
         addAndMakeVisible(comp);
     }
 
-    setSize (600, 400);
+    setSize (600, 480);
 }
 
 YATBEQAudioProcessorEditor::~YATBEQAudioProcessorEditor()
