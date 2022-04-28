@@ -83,6 +83,32 @@ void RotarySliderWithLabels::paint(juce::Graphics& g)
         sliderBounds.getX(), sliderBounds.getY(), sliderBounds.getWidth(), sliderBounds.getHeight(),
         jmap(getValue(), range.getStart(), range.getEnd(), 0.0, 1.0), 
         startAngle, endAngle, *this);
+
+    auto center = sliderBounds.toFloat().getCentre();
+    auto radius = sliderBounds.getWidth() * 0.5f;
+
+    g.setColour(Colour(0u, 172u, 1u));
+    g.setFont(getTextHeight());
+
+    auto nbrChoices = labels.size();
+    for(int i = 0; i < nbrChoices; ++i)
+    {
+        auto pos = labels[i].pos;
+        jassert(0.f <= pos);
+        jassert(pos <= 1.f);
+
+        auto angle = jmap(pos, 0.f, 1.f, startAngle, endAngle);
+
+        auto c = center.getPointOnCircumference(radius + getTextHeight() * 0.5f + 1, angle);
+
+        Rectangle<float>r;
+        auto str = labels[i].label;
+        r.setSize(g.getCurrentFont().getStringWidth(str), getTextHeight());
+        r.setCentre(c);
+        r.setY(r.getY() + getTextHeight());
+
+        g.drawFittedText(str, r.toNearestInt(), juce::Justification::centred, 1);
+    }
 }
 
 juce::Rectangle<int> RotarySliderWithLabels::getSliderBounds() const
@@ -298,6 +324,9 @@ YATBEQAudioProcessorEditor::YATBEQAudioProcessorEditor (YATBEQAudioProcessor& p)
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
+
+    peakFreqSlider.labels.add({ 0.f, "20Hz" });
+    peakFreqSlider.labels.add({ 1.f, "20kHz" });
 
     for (auto* comp : getComps())
     {
