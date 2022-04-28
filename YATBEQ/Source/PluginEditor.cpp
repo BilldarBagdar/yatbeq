@@ -10,7 +10,7 @@
 #include "PluginEditor.h"
 
 void LookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, int width, int height, 
-    float sliderPosProportional, float rotaryStartAngle, float rotaryEndAngle, juce::Slider&)
+    float sliderPosProportional, float rotaryStartAngle, float rotaryEndAngle, juce::Slider& slider)
 {
     using namespace juce;
 
@@ -22,24 +22,43 @@ void LookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, int width, i
     g.setColour(Colour(255u, 154u, 1u));
     g.drawEllipse(bounds, 1.f);
 
-    auto center = bounds.getCentre();
+    if(auto* rswl = dynamic_cast<RotarySliderWithLabels*>(&slider))
+    {
+        auto center = bounds.getCentre();
 
-    Path p;
+        Path p;
 
-    Rectangle<float> r;
-    r.setLeft(center.getX() - 2);
-    r.setRight(center.getX() + 2);
-    r.setTop(bounds.getY());
-    r.setBottom(center.getY());
+        Rectangle<float> r;
+        r.setLeft(center.getX() - 2);
+        r.setRight(center.getX() + 2);
+        r.setTop(bounds.getY());
+        r.setBottom(center.getY() - rswl->getTextHeight() * 1.5);
 
-    p.addRectangle(r);
+    	p.addRoundedRectangle(r, 2.f);
 
-    jassert(rotaryStartAngle < rotaryEndAngle);
+	    jassert(rotaryStartAngle < rotaryEndAngle);
 
-    auto sliderAngleRadians = jmap(sliderPosProportional, 0.f, 1.f, rotaryStartAngle, rotaryEndAngle);
+	    auto sliderAngleRadians = jmap(sliderPosProportional, 0.f, 1.f, rotaryStartAngle, rotaryEndAngle);
 
-    p.applyTransform(AffineTransform().rotated(sliderAngleRadians, center.getX(), center.getY()));
-    g.fillPath(p);
+	    p.applyTransform(AffineTransform().rotated(sliderAngleRadians, center.getX(), center.getY()));
+	    g.fillPath(p);
+
+        g.setFont(rswl->getTextHeight());
+        auto text = rswl->getDisplayString();
+        auto textWidth = g.getCurrentFont().getStringWidth(text);
+
+        r.setSize(textWidth + 4, rswl->getTextHeight() + 2);
+        r.setCentre(bounds.getCentre());
+
+        g.setColour(Colours::black);
+        g.fillRect(r);
+
+        g.setColour(Colours::white);
+        g.drawFittedText(text, r.toNearestInt(), juce::Justification::centred, 1);
+    }
+
+    
+
 }
 
 //==============================================================================
@@ -80,6 +99,12 @@ juce::Rectangle<int> RotarySliderWithLabels::getSliderBounds() const
     return rtn;
 }
 
+
+juce::String RotarySliderWithLabels::getDisplayString() const
+
+{
+    return juce::String(getValue());
+}
 
 //==============================================================================
 ResponseCurveComponent::ResponseCurveComponent(YATBEQAudioProcessor& p) : audioProcessor(p)
