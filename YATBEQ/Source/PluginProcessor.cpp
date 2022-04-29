@@ -331,13 +331,6 @@ ChainSettings getTreeStateChainSettings(juce::AudioProcessorValueTreeState& apvt
     return rtn;
 }
 
-//MyCoefficients makeThisPeakFilter(const ChainSettings& chainSettings, double sampleRate)
-//{
-//    MyCoefficients rtn = juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, chainSettings.peakFreq, chainSettings.peakQuality,
-//        juce::Decibels::decibelsToGain(chainSettings.peakGainInDecibels));
-//    return rtn;
-//}
-
 void updateCoefficients(MyCoefficients& old, const MyCoefficients& replacements)
 {
     *old = *replacements;

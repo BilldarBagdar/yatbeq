@@ -162,60 +162,10 @@ public:
 private:
     //==============================================================================
     //==============================================================================
-    //using Filter = juce::dsp::IIR::Filter<float>;
-
-    //using CutFilter = juce::dsp::ProcessorChain<Filter, Filter, Filter, Filter>;
-
-    //using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, CutFilter>;
 
     MonoChain leftChain, rightChain;
 
-    //enum ChainPositions
-    //{
-    //    LowCut,
-    //    Peak,
-    //    HighCut
-    //};
-
     void updatePeakFilter(const ChainSettings& chainSettings);
-
-    //template<int Index, typename ChainType, typename CoefficientType>
-    //void update(ChainType& chain, CoefficientType& coefficients)
-    //{
-    //    updateCoefficients(chain.template get<Index>().coefficients, coefficients[Index]);
-    //    chain.template setBypassed<Index>(false);
-    //}
-
-    //template<typename ChainType, typename CoefficientType>
-    //void updateCutFilter(ChainType& cutType, const CoefficientType& cutCoefficients, const Cut_Slope& cutSlope)
-    //{
-
-    //    cutType.template setBypassed<0>(true);
-    //    cutType.template setBypassed<1>(true);
-    //    cutType.template setBypassed<2>(true);
-    //    cutType.template setBypassed<3>(true);
-
-    //    switch (cutSlope)
-    //    {
-    //    case Slope_48:
-    //    {
-    //        update<3>(cutType, cutCoefficients);
-    //    }
-    //    case Slope_36:
-    //    {
-    //        update<2>(cutType, cutCoefficients);
-    //    }
-    //    case Slope_24:
-    //    {
-    //        update<1>(cutType, cutCoefficients);
-    //    }
-    //    case Slope_12:
-    //    {
-    //        update<0>(cutType, cutCoefficients);
-    //    }
-    //    }
-
-    //}
 
     void updateLowCutFilters(const ChainSettings& chainSettings);
     void updateHighCutFilters(const ChainSettings& chainSettings);
