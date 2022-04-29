@@ -274,7 +274,11 @@ void ResponseCurveComponent::paint(juce::Graphics& g)
     }
 
     g.setColour(Colours::orange);
-    g.drawRoundedRectangle(getRenderedArea().toFloat(), 4.f, 1.f);
+    g.drawRoundedRectangle(getAnalysisArea().toFloat(), 4.f, 1.f);
+    //g.setColour(Colours::red);
+    //g.drawRoundedRectangle(getRenderedArea().toFloat(), 4.f, 1.f);
+    //g.setColour(Colours::green);
+    //g.drawRoundedRectangle(getLocalBounds().toFloat(), 4.f, 1.f);
 
     g.setColour(Colours::white);
     g.strokePath(responseCurve, PathStrokeType(2.f));
@@ -335,7 +339,7 @@ void ResponseCurveComponent::resized()
     for (auto f : freqs)
 	{
 		auto normX = mapFromLog10(f, 20.f, 20000.f);
-        xs.add((left + width) * normX);
+        xs.add(left + width * normX);
 	}
 
     g.setColour(Colours::darkgrey);
@@ -359,7 +363,42 @@ void ResponseCurveComponent::resized()
         g.setColour(gDb == 0.f ? Colour(0u, 172u, 1u) : Colours::darkgrey);
         g.drawHorizontalLine(y, left, right);
     }
+
+
     //g.drawRect(getRenderedArea());
+    g.setColour(Colours::lightgrey);
+    const int fontHeight = 10;
+    g.setFont(fontHeight);
+
+    for (int i = 0; i < freqs.size(); ++i)
+    {
+        auto f = freqs[i];
+        auto x = xs[i];
+
+        bool addK = false;
+        String str;
+        if (f > 999.f)
+        {
+            addK = true;
+            f /= 1000;
+        }
+
+        str << f;
+        if (addK)
+        {
+            str << "k";
+        }
+        str << "Hz";
+
+        auto textWidth = g.getCurrentFont().getStringWidth(str);
+
+        Rectangle<int> r;
+        r.setSize(textWidth, fontHeight);
+        r.setCentre(x, 0);
+        r.setY(1);
+
+        g.drawFittedText(str, r, juce::Justification::centred, 1);
+    }
 }
 
 juce::Rectangle<int> ResponseCurveComponent::getRenderedArea()
