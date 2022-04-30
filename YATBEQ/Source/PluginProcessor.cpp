@@ -106,6 +106,9 @@ void YATBEQAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock
 
     // initialize filters with default settings
     updateFilters();
+
+    leftChannelFifo.prepare(samplesPerBlock);
+    rightChannelFifo.prepare(samplesPerBlock);
 }
 
 void YATBEQAudioProcessor::releaseResources()
@@ -175,6 +178,9 @@ void YATBEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
 
     leftChain.process(leftContext);
     rightChain.process(rightContext);
+
+    leftChannelFifo.update(buffer);
+    rightChannelFifo.update(buffer);
 }
 
 //==============================================================================
