@@ -11,8 +11,9 @@
 
 
 	// produces the FFT data from an audio buffer
-template(BlockType)
-void FFTDataGenerator<BlockType>::produceFFTDataRendering(const juce::AudioBuffer<float>& audioData, const float negativeInfinity)
+template(typename BlockType)
+;
+void produceFFTDataRendering(const juce::AudioBuffer<float>& audioData, const float negativeInfinity)
 {
     const auto fftSize = getFFTSize();
 
