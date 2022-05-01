@@ -11,11 +11,30 @@
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 
-//enum FFTOrder
-//{
-//    order2048 = 11, order4096 = 12, order8192 = 13
-//};
-//
+
+enum FFTOrder
+{
+    order2048 = 11, order4096 = 12, order8192 = 13
+};
+
+template<typename BlockType>
+struct FFTDataGenerator
+{
+    void produceFFTDataRendering(const juce::AudioBuffer<float>& audioData, const float negativeInfinity);
+    void changeOrder(FFTOrder newOrder);
+        int getFFTSize() const;
+    int getNumAvailableFFTDataBlocks() const;
+    bool getFFTData(BlockType& fftData);
+private:
+    FFTOrder order;
+    BlockType fftData;
+    std::unique_ptr<juce::dsp::FFT> forwardFFT;
+    std::unique_ptr<juce::dsp::WindowingFunction<float>> window;
+
+    Fifo<BlockType> fftDataFifo;
+
+};
+
 //template<typename BlockType>
 //struct FFTDataGenerator
 //{
