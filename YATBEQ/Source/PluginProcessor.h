@@ -60,6 +60,11 @@ struct Fifo
         return false;
     }
 
+    int getNumAvailableForReading() const
+    {
+        return fifo.getNumReady();
+    }
+
     private:
         static constexpr int Capacity = 30;
         std::array<T, Capacity> buffers;
@@ -88,7 +93,7 @@ struct SingleChannelSampleFifo
 
         for(int i = 0; i < buffer.getNumSamples(); ++i)
         {
-            pushNextSampleIntoFiFo(channelPtr[i]);
+            pushNextSampleIntoFifo(channelPtr[i]);
         }
 	}
 
