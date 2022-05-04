@@ -282,6 +282,9 @@ void ResponseCurveComponent::paint(juce::Graphics& g)
         responseCurve.lineTo(responseArea.getX() + i, map(mags[i]));
     }
 
+    g.setColour(Colours::blue);
+    g.strokePath(leftChannelFFTPath, PathStrokeType(1.f));
+
     g.setColour(Colours::orange);
     g.drawRoundedRectangle(getAnalysisArea().toFloat(), 4.f, 1.f);
     //g.setColour(Colours::red);
@@ -325,14 +328,45 @@ void ResponseCurveComponent::timerCallback()
         }
     }
 
+    // if there are FFT data buffers that can be pulled
+    // pull all available
+    //generate a path
+
+    const auto fftBounds = getAnalysisArea().toFloat();
+    const auto fftSize = leftChannelFFTDataGenerator.getFFTSize();
+
+    // 48000 / 2048 = 23hz <-- sample rate / number of bins = bin width
+    const auto binWidth = audioProcessor.getSampleRate() / (double)fftSize;
+
+    while (leftChannelFFTDataGenerator.getNumAvailableFFTDataBlocks() > 0)
+    {
+        std::vector<float> fftData;
+	    if (leftChannelFFTDataGenerator.getFFTData(fftData))
+	    {
+            pathProducer.generatePath(fftData, fftBounds, fftSize, binWidth, -48.f);
+	    }
+    }
+
+    // while there are Paths that can be pulled
+    // pull all available
+    // display the most recent
+
+    while (pathProducer.getNumPathsAvailable() > 0)
+    {
+        pathProducer.getPath(leftChannelFFTPath);
+    }
+
+
     if (parametersChanged.compareAndSetBool(false, true))
     {
         // update the mono chain
         updateChain();
 
         // signal a repaint
-        repaint();
+        //repaint();
     }
+
+    repaint();
 }
 
 void ResponseCurveComponent::updateChain()
