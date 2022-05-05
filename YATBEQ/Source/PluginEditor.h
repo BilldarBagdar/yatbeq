@@ -106,7 +106,7 @@ struct AnalyzerPathGenerator
 
         auto y = map(renderData[0]);
 
-        jassert(std::isnan(y) && !std::isinf(y));
+        jassert(!std::isnan(y) && !std::isinf(y));
 
         p.startNewSubPath(0, y);
 
@@ -117,9 +117,9 @@ struct AnalyzerPathGenerator
         {
             y = map(renderData[binNum]);
 
-            jassert(std::isnan(y) && !std::isinf(y));
+            jassert(!std::isnan(y) && !std::isinf(y));
 
-            if (std::isnan(y) && !std::isinf(y))
+            if (!std::isnan(y) && !std::isinf(y))
             {
                 auto binFreq = binNum * binWidth;
                 auto normalizedBinX = juce::mapFromLog10(binFreq, 1.f, 20000.f);
