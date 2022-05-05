@@ -109,6 +109,14 @@ void YATBEQAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock
 
     leftChannelFifo.prepare(samplesPerBlock);
     rightChannelFifo.prepare(samplesPerBlock);
+
+    osc.initialise([](float x) { return std::sin(x); });
+
+    spec.numChannels = getTotalNumOutputChannels();
+    osc.prepare((spec));
+    osc.setFrequency(5000);
+
+
 }
 
 void YATBEQAudioProcessor::releaseResources()
@@ -168,8 +176,15 @@ void YATBEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     // make updates
     updateFilters();
 
+
     // run audio
     juce::dsp::AudioBlock<float> block(buffer);
+
+    buffer.clear();
+    juce::dsp::ProcessContextReplacing<float> stereoContext(block);
+    osc.process(stereoContext);
+
+
     auto leftBlock = block.getSingleChannelBlock(0);
     auto rightBlock = block.getSingleChannelBlock(1);
 
