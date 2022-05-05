@@ -351,7 +351,7 @@ void ResponseCurveComponent::timerCallback()
     // pull all available
     // display the most recent
 
-    while (pathProducer.getNumPathsAvailable() > 0)
+    while (pathProducer.getNumPathsAvailable())
     {
         pathProducer.getPath(leftChannelFFTPath);
     }
