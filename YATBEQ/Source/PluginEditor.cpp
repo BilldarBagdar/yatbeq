@@ -328,16 +328,19 @@ void ResponseCurveComponent::paint(juce::Graphics& g)
         responseCurve.lineTo(responseArea.getX() + i, map(mags[i]));
     }
 
-    juce::Path leftChannelFFTPath = leftPathProducer.getPath();
-    juce::Path rightChannelFFTPath = rightPathProducer.getPath();
+    if (shouldShowFFTAnalysis)
+    {
+        juce::Path leftChannelFFTPath = leftPathProducer.getPath();
+        juce::Path rightChannelFFTPath = rightPathProducer.getPath();
 
-    leftChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), responseArea.getY()));
-    rightChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), responseArea.getY()));
+        leftChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), responseArea.getY()));
+        rightChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), responseArea.getY()));
 
-    g.setColour(Colours::blue);
-    g.strokePath(leftChannelFFTPath, PathStrokeType(1.f));
-    g.setColour(Colours::skyblue);
-    g.strokePath(rightChannelFFTPath, PathStrokeType(1.f));
+        g.setColour(Colours::blue);
+        g.strokePath(leftChannelFFTPath, PathStrokeType(1.f));
+        g.setColour(Colours::skyblue);
+        g.strokePath(rightChannelFFTPath, PathStrokeType(1.f));
+    }
 
     g.setColour(Colours::orange);
     g.drawRoundedRectangle(getAnalysisArea().toFloat(), 4.f, 1.f);
@@ -414,10 +417,13 @@ void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate)
 
 void ResponseCurveComponent::timerCallback()
 {
-    auto fftBounds = getAnalysisArea().toFloat();
-    auto sampleRate = audioProcessor.getSampleRate();
-    leftPathProducer.process(fftBounds, sampleRate);
-    rightPathProducer.process(fftBounds, sampleRate);
+    if (shouldShowFFTAnalysis)
+    {
+        auto fftBounds = getAnalysisArea().toFloat();
+        auto sampleRate = audioProcessor.getSampleRate();
+        leftPathProducer.process(fftBounds, sampleRate);
+        rightPathProducer.process(fftBounds, sampleRate);
+    }
 
     if (parametersChanged.compareAndSetBool(false, true))
     {
@@ -677,6 +683,14 @@ YATBEQAudioProcessorEditor::YATBEQAudioProcessorEditor (YATBEQAudioProcessor& p)
 
             comp->highCutFreqSlider.setEnabled(!bypassed);
             comp->highCutSlopeSlider.setEnabled(!bypassed);
+        }
+    };
+    analyzerEnabledButton.onClick = [safePtr]()
+    {
+        if (auto* comp = safePtr.getComponent())
+        {
+            auto enabled = comp->analyzerEnabledButton.getToggleState();
+            comp->responseCurveComponent.toggleAnalysisEnablement(enabled);
         }
     };
 

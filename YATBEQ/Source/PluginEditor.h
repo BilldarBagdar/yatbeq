@@ -236,6 +236,11 @@ struct ResponseCurveComponent : juce::Component,
 
     void resized();
 
+    void toggleAnalysisEnablement(bool enabled)
+    {
+        shouldShowFFTAnalysis = enabled;
+    };
+
 private:
     YATBEQAudioProcessor& audioProcessor;
     juce::Atomic<bool> parametersChanged{ false };
@@ -250,6 +255,7 @@ private:
 
     PathProducer leftPathProducer, rightPathProducer;
 
+    bool shouldShowFFTAnalysis = true;
 };
 
 struct PowerButton : juce::ToggleButton {};
