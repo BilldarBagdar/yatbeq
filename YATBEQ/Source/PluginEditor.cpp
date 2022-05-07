@@ -227,38 +227,43 @@ void ResponseCurveComponent::paint(juce::Graphics& g)
             mag *= peak.coefficients->getMagnitudeForFrequency(freq, sampleRate);
         }
 
-        if (!lowCut.isBypassed<0>())
+        if (!monoChain.isBypassed<ChainPositions::LowCut>())
         {
-            mag *= lowCut.get<0>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+            if (!lowCut.isBypassed<0>())
+            {
+                mag *= lowCut.get<0>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+            }
+            if (!lowCut.isBypassed<1>())
+            {
+                mag *= lowCut.get<1>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+            }
+            if (!lowCut.isBypassed<2>())
+            {
+                mag *= lowCut.get<2>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+            }
+            if (!lowCut.isBypassed<3>())
+            {
+                mag *= lowCut.get<3>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+            }
         }
-        if (!lowCut.isBypassed<1>())
+        if (!monoChain.isBypassed<ChainPositions::HighCut>())
         {
-            mag *= lowCut.get<1>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
-        }
-        if (!lowCut.isBypassed<2>())
-        {
-            mag *= lowCut.get<2>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
-        }
-        if (!lowCut.isBypassed<3>())
-        {
-            mag *= lowCut.get<3>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
-        }
-
-        if (!highCut.isBypassed<0>())
-        {
-            mag *= highCut.get<0>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
-        }
-        if (!highCut.isBypassed<1>())
-        {
-            mag *= highCut.get<1>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
-        }
-        if (!highCut.isBypassed<2>())
-        {
-            mag *= highCut.get<2>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
-        }
-        if (!highCut.isBypassed<3>())
-        {
-            mag *= highCut.get<3>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+            if (!highCut.isBypassed<0>())
+            {
+                mag *= highCut.get<0>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+            }
+            if (!highCut.isBypassed<1>())
+            {
+                mag *= highCut.get<1>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+            }
+            if (!highCut.isBypassed<2>())
+            {
+                mag *= highCut.get<2>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+            }
+            if (!highCut.isBypassed<3>())
+            {
+                mag *= highCut.get<3>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+            }
         }
 
         mags[i] = Decibels::gainToDecibels(mag);
@@ -386,6 +391,11 @@ void ResponseCurveComponent::timerCallback()
 void ResponseCurveComponent::updateChain()
 {
     auto chainSettings = getTreeStateChainSettings(audioProcessor.apvts);
+
+    monoChain.setBypassed<ChainPositions::LowCut>(chainSettings.lowCutBypassed);
+    monoChain.setBypassed<ChainPositions::HighCut>(chainSettings.highCutBypassed);
+    monoChain.setBypassed<ChainPositions::Peak>(chainSettings.peakBypassed);
+
     auto peakCoefficients = makeThisPeakFilter(chainSettings, audioProcessor.getSampleRate());
     updateCoefficients(monoChain.get < ChainPositions::Peak>().coefficients, peakCoefficients);
 
