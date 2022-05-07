@@ -180,9 +180,10 @@ void YATBEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     // run audio
     juce::dsp::AudioBlock<float> block(buffer);
 
-    buffer.clear();
-    juce::dsp::ProcessContextReplacing<float> stereoContext(block);
-    osc.process(stereoContext);
+    // test oscillator tone setup, measure FFT accuracy
+    //buffer.clear();
+    //juce::dsp::ProcessContextReplacing<float> stereoContext(block);
+    //osc.process(stereoContext);
 
 
     auto leftBlock = block.getSingleChannelBlock(0);
