@@ -287,6 +287,11 @@ juce::AudioProcessorValueTreeState::ParameterLayout YATBEQAudioProcessor::create
     rtn.add(std::make_unique<juce::AudioParameterChoice>("HighCut Slope", "HighCut Slope",
         cutAmountChoices, 0));
 
+    rtn.add(std::make_unique<juce::AudioParameterBool>("LowCut Bypassed", "LowCut Bypassed", false));
+    rtn.add(std::make_unique<juce::AudioParameterBool>("HighCut Bypassed", "HighCut Bypassed", false));
+    rtn.add(std::make_unique<juce::AudioParameterBool>("Peak Bypassed", "Peak Bypassed", false));
+    rtn.add(std::make_unique<juce::AudioParameterBool>("Analyzer Enabled", "Analyzer Enabled", true));
+
     return rtn;
 }
 
@@ -294,16 +299,23 @@ void YATBEQAudioProcessor::updatePeakFilter(const ChainSettings& chainSettings)
 {
     auto peakCoefficients = makeThisPeakFilter(chainSettings, getSampleRate());
 
+    leftChain.setBypassed<ChainPositions::Peak>(chainSettings.peakBypassed);
+    rightChain.setBypassed<ChainPositions::Peak>(chainSettings.peakBypassed);
+
     updateCoefficients(leftChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
     updateCoefficients(rightChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
 }
 
 void YATBEQAudioProcessor::updateLowCutFilters(const ChainSettings& chainSettings)
 {
+
     auto lowCutCoefficients = makeLowCutFilter(chainSettings, getSampleRate());
 
     auto& leftLowCut = leftChain.get<ChainPositions::LowCut>();
     auto& rightLowCut = rightChain.get<ChainPositions::LowCut>();
+
+    leftChain.setBypassed<ChainPositions::LowCut>(chainSettings.lowCutBypassed);
+    rightChain.setBypassed<ChainPositions::LowCut>(chainSettings.lowCutBypassed);
 
     updateCutFilter(leftLowCut, lowCutCoefficients, chainSettings.lowCutSlope);
     updateCutFilter(rightLowCut, lowCutCoefficients, chainSettings.lowCutSlope);
@@ -315,6 +327,9 @@ void YATBEQAudioProcessor::updateHighCutFilters(const ChainSettings& chainSettin
 
     auto& leftHighCut = leftChain.get<ChainPositions::HighCut>();
     auto& rightHighCut = rightChain.get<ChainPositions::HighCut>();
+
+    leftChain.setBypassed<ChainPositions::HighCut>(chainSettings.highCutBypassed);
+    rightChain.setBypassed<ChainPositions::HighCut>(chainSettings.highCutBypassed);
 
     updateCutFilter(leftHighCut, highCutCoefficients, chainSettings.highCutSlope);
     updateCutFilter(rightHighCut, highCutCoefficients, chainSettings.highCutSlope);
@@ -349,6 +364,10 @@ ChainSettings getTreeStateChainSettings(juce::AudioProcessorValueTreeState& apvt
     // parameter calculation in prepareToPlay()
     rtn.lowCutSlope = static_cast<Cut_Slope>(apvts.getRawParameterValue("LowCut Slope")->load());
     rtn.highCutSlope = static_cast<Cut_Slope>(apvts.getRawParameterValue("HighCut Slope")->load());
+
+    rtn.lowCutBypassed = apvts.getRawParameterValue("LowCut Bypassed")->load() > 0.5f;
+    rtn.highCutBypassed = apvts.getRawParameterValue("HighCut Bypassed")->load() > 0.5f;
+    rtn.peakBypassed = apvts.getRawParameterValue("Peak Bypassed")->load() > 0.5f;
 
     return rtn;
 }
